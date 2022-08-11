@@ -1,0 +1,2 @@
+rg: GYRATION TYPE=RADIUS ATOMS=@allatoms
+PRINT ARG=rg STRIDE=1 FILE=colvar
