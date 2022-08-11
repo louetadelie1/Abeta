@@ -1,0 +1,49 @@
+MOLINFO MOLTYPE=protein STRUCTURE=../template.pdb 
+WHOLEMOLECULES ENTITY0=1-627
+
+# print detailed (action-by-action) timers at the end of simulation
+#DEBUG DETAILED_TIMERS FILE=DEBUG
+
+# EEF1SB Implicit solvation
+protein-h: GROUP NDX_FILE=../index.ndx NDX_GROUP=Protein-H 
+solv: EEFSOLV ATOMS=protein-h NOPBC NL_STRIDE=20 NL_BUFFER=0.1 
+bias: BIASVALUE ARG=solv 
+
+#include file with definition of metadynamics CVs
+INCLUDE FILE=../ticA.dat
+
+#include file with definition of metadynamics CVs involving the small molecule
+INCLUDE FILE=../CVs_drug.dat
+
+# PBMetaD
+pb: PBMETAD ...
+   ARG=tic_0,tic_1,tic_2,tic_3,tic_4,tic_5,tic_6,tic_7,tic_8,tic_9,tic_10,tic_11,reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14
+   ADAPTIVE=DIFF
+   HEIGHT=1.2
+   BIASFACTOR=50
+   SIGMA_MAX=0.1,0.1,0.1,0.2,0.1,0.1,0.2,0.1,0.2,0.2,0.1,0.2,150,150,150,150,150,150,150,150,150,150,150,150,150,150
+   SIGMA_MIN=0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+   SIGMA=1000
+   PACE=500
+   GRID_MIN=-3.7,-6.2,-7.3,-7.9,-8.0,-10.3,-10.5,-11.3,-10.8,-10.9,-11.6,-12.0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+   GRID_MAX=3.7,6.2,7.3,7.9,8.0,10.3,10.5,11.3,10.8,10.9,11.6,12.0,150,150,150,150,150,150,150,150,150,150,150,150,150,150
+   GRID_SPACING=0.1,0.2,0.2,0.3,0.2,0.2,0.3,0.2,0.3,0.4,0.2,0.3,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1  
+   GRID_WSTRIDE=10000
+#   GRID_RFILES=../conf0/GRID.tic_0,../conf0/GRID.tic_1,../conf0/GRID.tic_2,../conf0/GRID.tic_3,../conf0/GRID.tic_4,../conf0/GRID.tic_5,../conf0/GRID.tic_6,../conf0/GRID.tic_7,../conf0/GRID.tic_8,../conf0/GRID.tic_9,../conf0/GRID.tic_10,../conf0/GRID.tic_11,../conf0/GRID.reg1,../conf0/GRID.reg2,../conf0/GRID.reg3,../conf0/GRID.reg4,../conf0/GRID.reg5,../conf0/GRID.reg6,../conf0/GRID.reg7,../conf0/GRID.reg8,../conf0/GRID.reg9,../conf0/GRID.reg10,../conf0/GRID.reg11,../conf0/GRID.reg12,../conf0/GRID.reg13,../conf0/GRID.reg14,../conf0/GRID.ligtor1,../conf0/GRID.ligtor2,../conf0/GRID.ligtor3,../conf0/GRID.ligtor4
+   WALKERS_MPI
+   FILE=HILLS_0,HILLS_1,HILLS_2,HILLS_3,HILLS_4,HILLS_5,HILLS_6,HILLS_7,HILLS_8,HILLS_9,HILLS_10,HILLS_11,HILLS_reg1,HILLS_reg2,HILLS_reg3,HILLS_reg4,HILLS_reg5,HILLS_reg6,HILLS_reg7,HILLS_reg8,HILLS_reg9,HILLS_reg10,HILLS_reg11,HILLS_reg12,HILLS_reg13,HILLS_reg14
+
+...
+
+#Lower walls 
+#LOWER_WALLS ARG=reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14 AT=2.0 KAPPA=200 PERIODIC=NO
+allreg: COMBINE ARG=reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8,reg9,reg10,reg11,reg12,reg13,reg14 PERIODIC=NO
+lower: LOWER_WALLS ARG=allreg AT=5.0 KAPPA=500
+
+
+INCLUDE FILE=../plumed_re.dat
+
+
+#print out relevant info
+PRINT ARG=tic_0,tic_1,tic_2,tic_3,tic_4,tic_5,tic_6,tic_7,tic_8,tic_9,tic_10,tic_11,pb.bias FILE=COLVAR STRIDE=500
+ENDPLUMED
