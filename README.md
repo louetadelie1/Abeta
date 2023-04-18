@@ -5,5 +5,3 @@ All Analysis docs are included, most of which require additional weights files a
 To carry out the actual expeimrent, all necessary files (including topology files) are in the folder named "files" - all is in the shazam zip.
 
 
-
-:)
